@@ -16,6 +16,7 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
 - **Sensor Energi Akumulasi:** Pembacaan Total kWh per outlet (kompatibel dengan HA Energy Dashboard).
 - **Sensor Suhu:** Pemantauan suhu internal colokan (°C).
 - **Auto-Discovery:** Otomatis mendeteksi perangkat saat terhubung ke IP Home Assistant.
+- **Dukungan Semua Versi Firmware:** Kompatibel dengan firmware bawaan pabrik (1.0.66) maupun custom firmware modifikasi (1.0.68).
 
 ---
 
@@ -51,6 +52,29 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
 
 ---
 
-## 📜 Credits
-- Protocol analysis & tools: [ttaengz/mttl-w01-matterbridge](https://github.com/ttaengz/mttl-w01-matterbridge)
-- Home Assistant Native Integration: [ardabil](https://github.com/ardabil)
+## ⚡ Panduan Upgrade Custom Firmware (Opsional: Unlock Sensor Fisik V & A)
+
+Integrasi ini **langsung berfungsi pada firmware bawaan pabrik (1.0.66)**. Jika Anda ingin membuka sensor pembacaan voltase dan arus fisik murni dari chip metering hardware colokan, Anda dapat melakukan upgrade ke custom firmware patched (1.0.68).
+
+### 📥 Download File Firmware & Flasher
+- **Firmware Bawaan (Stock 1.0.66):** [comMTTL-W01_1.0.66.fwr](https://raw.githubusercontent.com/af950833/mttl_w01/main/work/firmware/1.0.66/comMTTL-W01_1.0.66.fwr) *(Sumber: Server Resmi LG U+ via af950833)*
+- **Custom Firmware Patched (1.0.68):** [comMTTL-W01_1.0.68_patched.fwr](https://raw.githubusercontent.com/af950833/mttl_w01/main/work/firmware/1.0.68/comMTTL-W01_1.0.68.fwr) *(Sumber: af950833/mttl_w01)*
+- **Tool Flashing GUI Windows:** [ota_gui_windows.exe](https://github.com/ttaengz/mttl-w01-matterbridge/raw/main/tools/ota_gui_windows.exe)
+
+### 🚀 Cara Flashing Firmware via Wi-Fi (SoftAP):
+1. Tekan tahan tombol fisik colokan selama **10 detik** hingga LED Wi-Fi berkedip cepat.
+2. Sambungkan Wi-Fi laptop/PC ke `TONLY_TAP_XXXXXXX` (Password: `LGU_XXXXXXX`).
+3. Buka **PowerShell as Administrator**, lalu matikan service Windows yang mengunci Port 80:
+   ```powershell
+   net stop http /y
+   ```
+4. Buka aplikasi **`ota_gui_windows.exe`** (Run as Administrator), pilih file `comMTTL-W01_1.0.68_patched.fwr`, lalu klik **Start OTA**.
+5. Tunggu hingga transfer $100\%$ dan colokan reboot otomatis (sekitar 30 detik).
+6. Sambungkan kembali ke Wi-Fi `TONLY_TAP_XXXXXXX` dan jalankan **`setup_wifi_gui_windows.exe`** untuk mengarahkan colokan ke Wi-Fi rumah & IP Home Assistant.
+
+---
+
+## 📜 Credits & Referensi
+- **Firmware & Reverse Engineering:** [af950833/mttl_w01](https://github.com/af950833/mttl_w01) (Penyedia firmware stock 1.0.66 & pembuat patch 1.0.68).
+- **Protokol & Setup Tools:** [ttaengz/mttl-w01-matterbridge](https://github.com/ttaengz/mttl-w01-matterbridge).
+- **Home Assistant Native HACS Integration:** [ardabil](https://github.com/ardabil).
