@@ -58,28 +58,6 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
 
 ---
 
-## 🛠️ Web Menu OTA & Firmware Manager
-
-Integrasi ini menyediakan antarmuka Web khusus untuk pembaruan OTA (*Over-The-Air*) firmware:
-
-### 1. Akses Langsung dari Home Assistant:
-Buka URL berikut di browser Anda:
-```text
-http://<IP_HOME_ASSISTANT>:8123/api/mttl_w01/ota
-```
-
-### 2. Pilihan Firmware yang Tersedia:
-- 🌟 **Versi 1.0.68 (Patched):** Mengaktifkan sensor tersembunyi (*Tegangan/Volt, Arus/Ampere, Suhu per Channel, Watt, dan Total kWh*).
-- 🔄 **Versi 1.0.66 (Stock Original):** Untuk memulihkan (*restore*) ke firmware pabrik resmi.
-
-### 3. Menjalankan Standalone Web OTA Tool di Laptop:
-```bash
-python3 tools/web_ota.py
-```
-*(Buka `http://localhost:8088` di browser laptop yang terhubung ke Wi-Fi SoftAP colokan).*
-
----
-
 ## 📜 Credits
-- Protocol analysis & tools: [ttaengz/mttl-w01-matterbridge](https://github.com/ttaengz/mttl-w01-matterbridge) & [af950833](https://github.com/af950833/mttl_w01)
+- Protocol analysis & tools: [ttaengz/mttl-w01-matterbridge](https://github.com/ttaengz/mttl-w01-matterbridge)
 - Home Assistant Native Integration: [ardabil](https://github.com/ardabil)
