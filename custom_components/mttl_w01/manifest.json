@@ -1,6 +1,6 @@
 {
   "domain": "mttl_w01",
-  "name": "LG / Jinheung MTTL-W01 Smart Power Strip",
+  "name": "Multi Tap Jinheung",
   "codeowners": ["@ardabil"],
   "config_flow": true,
   "documentation": "https://github.com/ardabil/ha-mttl-w01",

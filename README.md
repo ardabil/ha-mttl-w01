@@ -1,9 +1,9 @@
-# LG / Jinheung MTTL-W01 Home Assistant Integration (HACS)
+# Multi Tap Jinheung (Home Assistant Integration)
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/default)
 [![Validate with hassfest](https://img.shields.io/badge/hassfest-passing-brightgreen.svg)](https://github.com/home-assistant/core)
 
-Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pintar 4 lubang **LG / Jinheung MTTL-W01**.
+Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pintar 4 lubang **Multi Tap Jinheung** (LG MTTL-W01).
 
 ---
 
@@ -35,12 +35,12 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
    https://github.com/ardabil/ha-mttl-w01
    ```
 4. Pilih Type: **Integration** -> Klik **Add**.
-5. Cari **LG / Jinheung MTTL-W01 Smart Power Strip** -> Klik **Download**.
+5. Cari **Multi Tap Jinheung** -> Klik **Download**.
 6. Restart Home Assistant.
 
 ### 2. Tambahkan Integrasi di Home Assistant
 1. Buka **Settings** -> **Devices & Services** -> **Integrations**.
-2. Klik **+ Add Integration** -> Cari **LG / Jinheung MTTL-W01**.
+2. Klik **+ Add Integration** -> Cari **Multi Tap Jinheung**.
 3. Klik **Submit** (gunakan port default `10086`).
 
 ---

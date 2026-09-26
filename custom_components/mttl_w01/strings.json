@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "LG / Jinheung MTTL-W01 Setup",
-        "description": "Configure the local TCP server port and polling interval for the MTTL-W01 smart strip.",
+        "title": "Multi Tap Jinheung Setup",
+        "description": "Configure the local TCP server port and polling interval for Multi Tap Jinheung.",
         "data": {
           "port": "TCP Server Port (Default: 10086)",
           "poll_interval": "Polling Interval in seconds (Default: 10)"
@@ -11,14 +11,14 @@
       }
     },
     "abort": {
-      "already_configured": "MTTL-W01 TCP Bridge is already configured."
+      "already_configured": "Multi Tap Jinheung is already configured."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "MTTL-W01 Options",
-        "description": "Adjust bridge server options.",
+        "title": "Multi Tap Jinheung Options",
+        "description": "Adjust server options.",
         "data": {
           "port": "TCP Server Port",
           "poll_interval": "Polling Interval (seconds)"
