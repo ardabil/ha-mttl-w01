@@ -59,5 +59,5 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
 ---
 
 ## 📜 Credits
-- Protocol analysis: [ttaengz/mttl-w01-matterbridge](https://github.com/ttaengz/mttl-w01-matterbridge) & [omarKmekkawy](https://github.com/omarKmekkawy/Korean_LG_TCL_MTTL-w01_power-strip)
+- Protocol analysis & tools: [ttaengz/mttl-w01-matterbridge](https://github.com/ttaengz/mttl-w01-matterbridge)
 - Home Assistant Native Integration: [ardabil](https://github.com/ardabil)
