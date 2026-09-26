@@ -26,7 +26,8 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the MTTL-W01 sensor platform."""
-    server: MTTLServer = hass.data[DOMAIN][entry.entry_id]
+    entry_data = hass.data[DOMAIN][entry.entry_id]
+    server: MTTLServer = entry_data["server"] if isinstance(entry_data, dict) else entry_data
     known_devices: set[str] = set()
 
     @callback
