@@ -1,0 +1,11 @@
+{
+  "domain": "mttl_w01",
+  "name": "LG / Jinheung MTTL-W01 Smart Power Strip",
+  "codeowners": ["@ardabil"],
+  "config_flow": true,
+  "documentation": "https://github.com/ardabil/ha-mttl-w01",
+  "integration_type": "hub",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/ardabil/ha-mttl-w01/issues",
+  "version": "1.0.0"
+}

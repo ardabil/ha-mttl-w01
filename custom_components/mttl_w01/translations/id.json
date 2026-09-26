@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Pengaturan LG / Jinheung MTTL-W01",
+        "description": "Konfigurasi port server TCP lokal dan interval polling untuk colokan pintar MTTL-W01.",
+        "data": {
+          "port": "Port Server TCP (Default: 10086)",
+          "poll_interval": "Interval Polling dalam detik (Default: 10)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "MTTL-W01 TCP Bridge sudah terkonfigurasi."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opsi MTTL-W01",
+        "description": "Sesuaikan opsi server bridge.",
+        "data": {
+          "port": "Port Server TCP",
+          "poll_interval": "Interval Polling (detik)"
+        }
+      }
+    }
+  }
+}
