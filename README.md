@@ -19,6 +19,8 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
 
 ## 🌟 Fitur (Features)
 - **4 Saklar Independen:** Kontrol ON/OFF untuk masing-masing outlet 1 sampai 4.
+- **Sensor Tegangan (Volt):** Pembacaan voltase listrik (V).
+- **Sensor Arus (Ampere):** Pembacaan arus listrik per outlet dan total arus (A).
 - **Sensor Daya Realtime:** Pembacaan Watt (W) setiap outlet.
 - **Sensor Energi Akumulasi:** Pembacaan Total kWh per outlet (kompatibel dengan HA Energy Dashboard).
 - **Sensor Suhu:** Pemantauan suhu internal colokan (°C).

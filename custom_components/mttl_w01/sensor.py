@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -9,7 +10,13 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfEnergy, UnitOfPower, UnitOfTemperature
+from homeassistant.const import (
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfPower,
+    UnitOfTemperature,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -34,11 +41,15 @@ async def async_setup_entry(
     def on_device_event(device: MTTLDevice) -> None:
         if device.mac not in known_devices:
             known_devices.add(device.mac)
-            new_sensors = []
+            new_sensors: list[SensorEntity] = [
+                MTTLVoltageSensor(server, device.mac),
+                MTTLTotalCurrentSensor(server, device.mac),
+            ]
             for ch in range(1, 5):
                 new_sensors.extend(
                     [
                         MTTLPowerSensor(server, device.mac, ch),
+                        MTTLCurrentSensor(server, device.mac, ch),
                         MTTLEnergySensor(server, device.mac, ch),
                         MTTLTemperatureSensor(server, device.mac, ch),
                     ]
@@ -56,7 +67,7 @@ class MTTLBaseSensor(SensorEntity):
 
     _attr_has_entity_name = True
 
-    def __init__(self, server: MTTLServer, mac: str, outlet: int) -> None:
+    def __init__(self, server: MTTLServer, mac: str, outlet: int | None = None) -> None:
         self._server = server
         self._mac = mac.upper()
         self._outlet = outlet
@@ -87,6 +98,66 @@ class MTTLBaseSensor(SensorEntity):
                 self.async_write_ha_state()
 
         self.async_on_remove(self._server.register_listener(on_update))
+
+
+class MTTLVoltageSensor(MTTLBaseSensor):
+    """Line Voltage sensor in Volts."""
+
+    _attr_device_class = SensorDeviceClass.VOLTAGE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+
+    def __init__(self, server: MTTLServer, mac: str) -> None:
+        super().__init__(server, mac)
+        self._attr_unique_id = f"mttl_{self._mac.lower()}_voltage"
+        self._attr_name = "Voltage"
+
+    @property
+    def native_value(self) -> float | None:
+        device = self._server.devices.get(self._mac)
+        if device:
+            return device.voltage_v or 220.0
+        return None
+
+
+class MTTLTotalCurrentSensor(MTTLBaseSensor):
+    """Total Current sensor in Amperes."""
+
+    _attr_device_class = SensorDeviceClass.CURRENT
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
+
+    def __init__(self, server: MTTLServer, mac: str) -> None:
+        super().__init__(server, mac)
+        self._attr_unique_id = f"mttl_{self._mac.lower()}_total_current"
+        self._attr_name = "Total Current"
+
+    @property
+    def native_value(self) -> float | None:
+        device = self._server.devices.get(self._mac)
+        if device:
+            return device.total_current_a
+        return None
+
+
+class MTTLCurrentSensor(MTTLBaseSensor):
+    """Per-outlet Current sensor in Amperes."""
+
+    _attr_device_class = SensorDeviceClass.CURRENT
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
+
+    def __init__(self, server: MTTLServer, mac: str, outlet: int) -> None:
+        super().__init__(server, mac, outlet)
+        self._attr_unique_id = f"mttl_{self._mac.lower()}_current_{outlet}"
+        self._attr_name = f"Outlet {outlet} Current"
+
+    @property
+    def native_value(self) -> float | None:
+        device = self._server.devices.get(self._mac)
+        if device and self._outlet in device.outlets:
+            return device.outlets[self._outlet].get("current_a", 0.0)
+        return None
 
 
 class MTTLPowerSensor(MTTLBaseSensor):

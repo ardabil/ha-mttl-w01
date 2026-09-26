@@ -31,11 +31,14 @@ class MTTLDevice:
         self.ip_address = ip_address
         self.writer = writer
         self.online = True
+        self.voltage_v: float | None = None
+        self.total_current_a: float | None = None
         self.outlets: dict[int, dict[str, Any]] = {
             i: {
                 "channel": i,
                 "state": False,
                 "power_w": 0.0,
+                "current_a": 0.0,
                 "energy_kwh": 0.0,
                 "temperature_c": 0.0,
             }
@@ -47,6 +50,7 @@ class MTTLDevice:
             self.outlets[channel]["state"] = on
 
     def update_getinfo_data(self, channel_data: list[dict[str, Any]]) -> None:
+        total_curr = 0.0
         for data in channel_data:
             ch = data["channel"]
             if ch in self.outlets:
@@ -54,6 +58,18 @@ class MTTLDevice:
                 self.outlets[ch]["power_w"] = data["power_w"]
                 self.outlets[ch]["energy_kwh"] = data["energy_kwh"]
                 self.outlets[ch]["temperature_c"] = data["temperature_c"]
+                if "current_a" in data:
+                    self.outlets[ch]["current_a"] = data["current_a"]
+                    total_curr += data["current_a"]
+                elif data.get("state") and data["power_w"] > 0 and self.voltage_v:
+                    calc_curr = round(data["power_w"] / self.voltage_v, 3)
+                    self.outlets[ch]["current_a"] = calc_curr
+                    total_curr += calc_curr
+                else:
+                    self.outlets[ch]["current_a"] = 0.0
+        if "voltage_v" in channel_data[0] if channel_data else False:
+            self.voltage_v = channel_data[0].get("voltage_v")
+        self.total_current_a = round(total_curr, 3)
 
 
 class MTTLServer:
@@ -154,6 +170,7 @@ class MTTLServer:
                 data = await reader.read(1024)
                 if not data:
                     break
+                _LOGGER.debug("RAW INCOMING BYTES from %s: %r", ip, data)
                 buffer += data.decode("ascii", errors="ignore")
 
                 while "\n" in buffer:
@@ -161,6 +178,8 @@ class MTTLServer:
                     line = line.strip()
                     if not line:
                         continue
+
+                    _LOGGER.debug("RAW MTTL FRAME from %s: %s", ip, line)
 
                     # 1. Bootinfo frame
                     boot_match = BOOTINFO_REGEX.match(line)
