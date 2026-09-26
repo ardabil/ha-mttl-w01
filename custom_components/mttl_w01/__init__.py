@@ -1,4 +1,4 @@
-"""Home Assistant Integration for LG / Jinheung MTTL-W01 Power Strip."""
+"""Home Assistant Integration for Multi Tap Jinheung."""
 from __future__ import annotations
 
 import logging
@@ -8,6 +8,7 @@ from homeassistant.core import HomeAssistant
 
 from .const import CONF_POLL_INTERVAL, CONF_PORT, DEFAULT_POLL_INTERVAL, DEFAULT_PORT, DOMAIN
 from .tcp_server import MTTLServer
+from .ota_view import MTTLOtaManager, MTTLOtaView, MTTLOtaStartView, MTTLOtaStatusView
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ PLATFORMS: list[Platform] = [
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up MTTL-W01 from a config entry."""
+    """Set up Multi Tap Jinheung from a config entry."""
     hass.data.setdefault(DOMAIN, {})
 
     port = entry.options.get(CONF_PORT, entry.data.get(CONF_PORT, DEFAULT_PORT))
@@ -27,12 +28,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     server = MTTLServer(port=port, poll_interval=poll_interval)
+    ota_manager = MTTLOtaManager(hass)
+
+    hass.data[DOMAIN][entry.entry_id] = {
+        "server": server,
+        "ota_manager": ota_manager,
+    }
+
+    # Register OTA Web Endpoints
+    hass.http.register_view(MTTLOtaView())
+    hass.http.register_view(MTTLOtaStartView(ota_manager))
+    hass.http.register_view(MTTLOtaStatusView(ota_manager))
+
     await server.start()
-
-    hass.data[DOMAIN][entry.entry_id] = server
-
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
     entry.async_on_unload(entry.add_update_listener(update_listener))
     return True
 
@@ -41,8 +50,11 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
-        server: MTTLServer = hass.data[DOMAIN].pop(entry.entry_id)
-        await server.stop()
+        data = hass.data[DOMAIN].pop(entry.entry_id, None)
+        if data and isinstance(data, dict) and "server" in data:
+            await data["server"].stop()
+        elif isinstance(data, MTTLServer):
+            await data.stop()
     return unload_ok
 
 
