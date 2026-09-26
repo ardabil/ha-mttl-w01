@@ -8,15 +8,6 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
 
 ---
 
-## 🚀 Keunggulan Dibandingkan Matter / Add-on
-- **100% Native Python:** Berjalan langsung di dalam Home Assistant Core (tanpa butuh Docker container terpisah).
-- **Sangat Hemat Resource:** Konsumsi RAM hanya **~2-5 MB** (dibandingkan ~200MB pada add-on Docker).
-- **Tanpa Test DCL:** Tidak perlu mengaktifkan pengaturan Test DCL pada Matter Server.
-- **Komunikasi Langsung:** Direct local socket TCP (Port 10086) dengan latency nol.
-- **Real-time Push:** Respon instan saat tombol fisik ditekan secara manual.
-
----
-
 ## 🌟 Fitur (Features)
 - **4 Saklar Independen:** Kontrol ON/OFF untuk masing-masing outlet 1 sampai 4.
 - **Sensor Tegangan (Volt):** Pembacaan voltase listrik (V).
