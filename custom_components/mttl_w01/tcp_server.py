@@ -90,6 +90,13 @@ class MTTLServer:
         self.devices: dict[str, MTTLDevice] = {}
         self.listeners: list[Callable[[MTTLDevice], None]] = []
         self._poll_task: asyncio.Task | None = None
+        self._tasks: set[asyncio.Task] = set()
+
+    def _create_task(self, coro) -> asyncio.Task:
+        task = asyncio.create_task(coro)
+        self._tasks.add(task)
+        task.add_done_callback(self._tasks.discard)
+        return task
 
     def register_listener(self, callback: Callable[[MTTLDevice], None]) -> Callable[[], None]:
         """Register a callback for state changes."""
@@ -116,16 +123,17 @@ class MTTLServer:
             port=self.port,
         )
         _LOGGER.info("MTTL-W01 TCP Server listening on port %s", self.port)
-        self._poll_task = asyncio.create_task(self._poll_loop())
+        self._poll_task = self._create_task(self._poll_loop())
 
     async def stop(self) -> None:
         """Stop the TCP server."""
         if self._poll_task:
             self._poll_task.cancel()
-            try:
-                await self._poll_task
-            except asyncio.CancelledError:
-                pass
+        for task in list(self._tasks):
+            task.cancel()
+        if self._tasks:
+            await asyncio.gather(*self._tasks, return_exceptions=True)
+
         if self.server:
             self.server.close()
             await self.server.wait_closed()
@@ -230,7 +238,7 @@ class MTTLServer:
                         self._notify(current_device)
 
                         # Request immediate telemetry
-                        asyncio.create_task(self._poll_device(current_device))
+                        self._create_task(self._poll_device(current_device))
                         continue
 
                     if not current_device:
