@@ -210,11 +210,13 @@ class MTTLServer:
                 if not data:
                     break
                 _LOGGER.debug("RAW INCOMING BYTES from %s: %r", ip, data)
-                buffer += data.decode("ascii", errors="ignore")
+                # Strip null bytes inserted by Jinheung RTL8711AF socket padding
+                clean_str = data.replace(b"\x00", b"").decode("ascii", errors="ignore")
+                buffer += clean_str
 
                 while "\n" in buffer:
                     line, buffer = buffer.split("\n", 1)
-                    line = line.strip()
+                    line = line.strip(" \r\n\t\x00")
                     if not line:
                         continue
 
