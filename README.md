@@ -1,10 +1,10 @@
-# Multi Tap Jinheung / Stop Kontak Pintar (4-Gang Smart Power Strip)
+# Multi Tap Jinheung / Stop Kontak Smart (4-Gang Smart Power Strip)
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=ardabil&repository=ha-mttl-w01&category=integration)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/default)
 [![Validate with hassfest](https://img.shields.io/badge/hassfest-passing-brightgreen.svg)](https://github.com/home-assistant/core)
 
-Integrasi Native Home Assistant (HACS) berbasis Python murni untuk **Multi Tap Jinheung / Stop Kontak Pintar** (LG U+ MTTL-W01 4-Gang Smart Power Strip). Berjalan langsung menggunakan protokol TCP socket lokal (port `10086`) tanpa memerlukan perantara Matter bridge ataupun broker MQTT.
+Integrasi Native Home Assistant (HACS) berbasis Python murni untuk **Multi Tap Jinheung / Stop Kontak Smart** (LG U+ MTTL-W01 4-Gang Smart Power Strip). Berjalan langsung menggunakan protokol TCP socket lokal (port `10086`) tanpa memerlukan perantara Matter bridge ataupun broker MQTT.
 
 ---
 
