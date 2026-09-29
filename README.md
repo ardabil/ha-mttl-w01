@@ -4,6 +4,8 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/default)
 [![Validate with hassfest](https://img.shields.io/badge/hassfest-passing-brightgreen.svg)](https://github.com/home-assistant/core)
 
+**Bahasa Indonesia** | [English](README_EN.md)
+
 Integrasi Native Home Assistant (HACS) berbasis Python murni untuk **Multi Tap Jinheung / Stop Kontak Smart** (LG U+ MTTL-W01 4-Gang Smart Power Strip). Berjalan langsung menggunakan protokol TCP socket lokal (port `10086`) tanpa memerlukan perantara Matter bridge ataupun broker MQTT.
 
 ---
