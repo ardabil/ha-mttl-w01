@@ -4,19 +4,21 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/default)
 [![Validate with hassfest](https://img.shields.io/badge/hassfest-passing-brightgreen.svg)](https://github.com/home-assistant/core)
 
-Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pintar 4 lubang **Multi Tap Jinheung** (LG MTTL-W01).
+Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pintar 4 lubang **Multi Tap Jinheung** (LG MTTL-W01). Berjalan langsung menggunakan protokol TCP socket lokal (port `10086`) tanpa memerlukan perantara Matter bridge ataupun broker MQTT.
 
 ---
 
 ## 🌟 Fitur (Features)
-- **4 Saklar Independen:** Kontrol ON/OFF untuk masing-masing outlet 1 sampai 4.
-- **Sensor Tegangan (Volt):** Pembacaan voltase listrik (V).
-- **Sensor Arus (Ampere):** Pembacaan arus listrik per outlet dan total arus (A).
-- **Sensor Daya Realtime:** Pembacaan Watt (W) setiap outlet.
-- **Sensor Energi Akumulasi:** Pembacaan Total kWh per outlet (kompatibel dengan HA Energy Dashboard).
-- **Sensor Suhu:** Pemantauan suhu internal colokan (°C).
-- **Auto-Discovery:** Otomatis mendeteksi perangkat saat terhubung ke IP Home Assistant.
-- **Dukungan Semua Versi Firmware:** Kompatibel dengan firmware bawaan pabrik (1.0.66) maupun custom firmware modifikasi (1.0.68).
+
+- **4 Saklar Independen:** Kontrol ON/OFF untuk masing-masing outlet 1 sampai 4 dengan respons instan (*local push*).
+- **Sensor Tegangan Riil (Volt):** Membaca nilai RMS Voltage dinamis aktual dari chip metering hardware melalui perintah *native* `up:power_report:1:vol`.
+- **Sensor Arus Riil (Ampere):** Membaca arus fisik per outlet dan total arus keseluruhan (A) secara langsung melalui perintah *native* `up:power_report:<ch>:current`.
+- **Sensor Daya Realtime:** Pembacaan konsumsi daya aktif (Watt) setiap outlet.
+- **Sensor Energi Akumulasi:** Pembacaan akumulasi energi berjalan per outlet (kWh), kompatibel penuh dengan *Home Assistant Energy Dashboard*.
+- **Sensor Suhu Internal:** Pemantauan suhu internal PCB (°C) untuk keamanan proteksi overheat.
+- **Sensor Sinyal Wi-Fi (RSSI):** Pemantauan kualitas sinyal nirkabel colokan (dBm) via `up:query:wifirssi`.
+- **Auto-Discovery:** Otomatis mendeteksi perangkat baru ketika colokan terhubung ke port TCP Home Assistant.
+- **100% Native Firmware Bawaan:** Berfungsi penuh pada **firmware bawaan pabrik (1.0.66)**. **Tidak perlu memodifikasi atau mem-flash firmware sama sekali!**
 
 ---
 
@@ -24,7 +26,7 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
 
 ### 1. Tambahkan Custom Repository di HACS
 1. Di Home Assistant, buka menu **HACS** -> **Integrations**.
-2. Klik titik 3 di kanan atas -> pilih **Custom repositories**.
+2. Klik menu titik tiga (⋮) di kanan atas -> pilih **Custom repositories**.
 3. Masukkan Repository URL:
    ```text
    https://github.com/ardabil/ha-mttl-w01
@@ -40,41 +42,34 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
 
 ---
 
-## 🔌 Setup Wi-Fi Colokan (Khusus Pengguna Baru)
+## 🔌 Setup Wi-Fi Colokan (Pairing ke Home Assistant)
 
-1. Tekan dan tahan tombol utama colokan selama **10 detik** sampai lampu Wi-Fi berkedip cepat (Mode SoftAP).
-2. Konek laptop/PC ke Wi-Fi colokan `TONLY_TAP_XXXXXXX` (Password: `LGU_XXXXXXX`).
-3. Jalankan aplikasi setup GUI:
-   - 🪟 **[Download Setup Tool Windows (.exe)](https://github.com/ttaengz/mttl-w01-matterbridge/raw/main/tools/setup_wifi_gui_windows.exe)**
-   - 🍏 **[Download Setup Tool macOS (.zip)](https://github.com/ttaengz/mttl-w01-matterbridge/raw/main/tools/setup_wifi_gui_macos.zip)**
-4. Masukkan nama Wi-Fi rumah, password, dan **IP Home Assistant** Anda.
-5. Klik **Start Wi-Fi setup**. Setelah colokan reboot, perangkat akan otomatis terhubung ke Home Assistant!
+Colokan ini membutuhkan konfigurasi SSID Wi-Fi rumah dan IP Home Assistant Anda agar dapat mengalirkan data ke port `10086`.
 
----
+### 1. Masuk ke Mode Pairing (SoftAP)
+1. Colok Jinheung MTTL-W01 ke sumber listrik.
+2. Tekan dan tahan tombol fisik utama selama **10 detik** sampai lampu LED Wi-Fi berkedip cepat.
+3. Sambungkan Wi-Fi laptop atau HP Anda ke access point colokan:
+   - **SSID:** `TONLY_TAP_XXXXXXX`
+   - **Password:** `LGU_XXXXXXX`
 
-## ⚡ Panduan Upgrade Custom Firmware (Opsional: Unlock Sensor Fisik V & A)
+### 2. Kirim Konfigurasi Jaringan
+Gunakan salah satu alat bantu di bawah ini:
 
-Integrasi ini **langsung berfungsi pada firmware bawaan pabrik (1.0.66)**. Jika Anda ingin membuka sensor pembacaan voltase dan arus fisik murni dari chip metering hardware colokan, Anda dapat melakukan upgrade ke custom firmware patched (1.0.68).
+* **Pilihan A: Menggunakan PC/Laptop (GUI Tool)**
+  - 🪟 **[Download Setup Tool Windows (.exe)](https://github.com/ttaengz/mttl-w01-matterbridge/raw/main/tools/setup_wifi_gui_windows.exe)**
+  - 🍏 **[Download Setup Tool macOS (.zip)](https://github.com/ttaengz/mttl-w01-matterbridge/raw/main/tools/setup_wifi_gui_macos.zip)**
+  - Buka aplikasi, masukkan SSID Wi-Fi 2.4 GHz, Password Wi-Fi rumah, dan **IP Home Assistant** Anda.
+  - Klik **Start Wi-Fi setup**.
 
-### 📥 Download File Firmware & Flasher
-- **Firmware Bawaan (Stock 1.0.66):** [comMTTL-W01_1.0.66.fwr](https://raw.githubusercontent.com/af950833/mttl_w01/main/work/firmware/1.0.66/comMTTL-W01_1.0.66.fwr) *(Sumber: Server Resmi LG U+ via af950833)*
-- **Custom Firmware Patched (1.0.68):** [comMTTL-W01_1.0.68_patched.fwr](https://raw.githubusercontent.com/af950833/mttl_w01/main/work/firmware/1.0.68/comMTTL-W01_1.0.68.fwr) *(Sumber: af950833/mttl_w01)*
-- **Tool Flashing GUI Windows:** [ota_gui_windows.exe](https://github.com/ttaengz/mttl-w01-matterbridge/raw/main/tools/ota_gui_windows.exe)
+* **Pilihan B: Menggunakan HP Android (APK)**
+  - 📱 **[Download MTTL-W01 Provisioner APK](https://github.com/af950833/mttl_w01/raw/main/web/downloads/MTTL-W01-Provisioner.apk)**
+  - Pasang di Android, pilih SSID Wi-Fi 2.4 GHz, masukkan password, lalu klik **Provision**.
 
-### 🚀 Cara Flashing Firmware via Wi-Fi (SoftAP):
-1. Tekan tahan tombol fisik colokan selama **10 detik** hingga LED Wi-Fi berkedip cepat.
-2. Sambungkan Wi-Fi laptop/PC ke `TONLY_TAP_XXXXXXX` (Password: `LGU_XXXXXXX`).
-3. Buka **PowerShell as Administrator**, lalu matikan service Windows yang mengunci Port 80:
-   ```powershell
-   net stop http /y
-   ```
-4. Buka aplikasi **`ota_gui_windows.exe`** (Run as Administrator), pilih file `comMTTL-W01_1.0.68_patched.fwr`, lalu klik **Start OTA**.
-5. Tunggu hingga transfer $100\%$ dan colokan reboot otomatis (sekitar 30 detik).
-6. Sambungkan kembali ke Wi-Fi `TONLY_TAP_XXXXXXX` dan jalankan **`setup_wifi_gui_windows.exe`** untuk mengarahkan colokan ke Wi-Fi rumah & IP Home Assistant.
+Setelah colokan reboot otomatis (LED berhenti berkedip), colokan akan langsung terhubung ke Home Assistant dan seluruh saklar serta sensor akan otomatis muncul!
 
 ---
 
 ## 📜 Credits & Referensi
-- **Firmware & Reverse Engineering:** [af950833/mttl_w01](https://github.com/af950833/mttl_w01) (Penyedia firmware stock 1.0.66 & pembuat patch 1.0.68).
-- **Protokol & Setup Tools:** [ttaengz/mttl-w01-matterbridge](https://github.com/ttaengz/mttl-w01-matterbridge).
-- **Home Assistant Native HACS Integration:** [ardabil](https://github.com/ardabil).
+- **Protokol & Setup Tools:** [ttaengz/mttl-w01-matterbridge](https://github.com/ttaengz/mttl-w01-matterbridge)
+- **Home Assistant Native HACS Integration:** [ardabil](https://github.com/ardabil)

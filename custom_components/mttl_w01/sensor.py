@@ -21,6 +21,23 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+try:
+    from homeassistant.const import EntityCategory
+except ImportError:
+    from homeassistant.helpers.entity import EntityCategory  # type: ignore
+
+try:
+    from homeassistant.const import UnitOfSignalStrength
+
+    SIGNAL_DBM = UnitOfSignalStrength.DECIBELS_MILLIWATT
+except (ImportError, AttributeError):
+    try:
+        from homeassistant.const import (
+            SIGNAL_STRENGTH_DECIBELS_MILLIWATT as SIGNAL_DBM,
+        )
+    except ImportError:
+        SIGNAL_DBM = "dBm"
+
 from .const import DOMAIN
 from .tcp_server import MTTLDevice, MTTLServer
 
@@ -34,7 +51,9 @@ async def async_setup_entry(
 ) -> None:
     """Set up the MTTL-W01 sensor platform."""
     entry_data = hass.data[DOMAIN][entry.entry_id]
-    server: MTTLServer = entry_data["server"] if isinstance(entry_data, dict) else entry_data
+    server: MTTLServer = (
+        entry_data["server"] if isinstance(entry_data, dict) else entry_data
+    )
     known_devices: set[str] = set()
 
     @callback
@@ -44,6 +63,7 @@ async def async_setup_entry(
             new_sensors: list[SensorEntity] = [
                 MTTLVoltageSensor(server, device.mac),
                 MTTLTotalCurrentSensor(server, device.mac),
+                MTTLWifiRssiSensor(server, device.mac),
             ]
             for ch in range(1, 5):
                 new_sensors.extend(
@@ -92,6 +112,7 @@ class MTTLBaseSensor(SensorEntity):
 
     async def async_added_to_hass(self) -> None:
         """Register state update listener."""
+
         @callback
         def on_update(device: MTTLDevice) -> None:
             if device.mac == self._mac:
@@ -115,9 +136,9 @@ class MTTLVoltageSensor(MTTLBaseSensor):
     @property
     def native_value(self) -> float | None:
         device = self._server.devices.get(self._mac)
-        if device:
-            return device.voltage_v or 220.0
-        return None
+        if device and device.voltage_v is not None:
+            return device.voltage_v
+        return 220.0
 
 
 class MTTLTotalCurrentSensor(MTTLBaseSensor):
@@ -217,4 +238,25 @@ class MTTLTemperatureSensor(MTTLBaseSensor):
         device = self._server.devices.get(self._mac)
         if device and self._outlet in device.outlets:
             return device.outlets[self._outlet]["temperature_c"]
+        return None
+
+
+class MTTLWifiRssiSensor(MTTLBaseSensor):
+    """Wi-Fi Signal Strength sensor in dBm."""
+
+    _attr_device_class = SensorDeviceClass.SIGNAL_STRENGTH
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = SIGNAL_DBM
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, server: MTTLServer, mac: str) -> None:
+        super().__init__(server, mac)
+        self._attr_unique_id = f"mttl_{self._mac.lower()}_wifi_rssi"
+        self._attr_name = "Wi-Fi Signal"
+
+    @property
+    def native_value(self) -> int | None:
+        device = self._server.devices.get(self._mac)
+        if device:
+            return device.wifi_rssi
         return None

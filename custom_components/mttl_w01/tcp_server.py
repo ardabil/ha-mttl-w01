@@ -12,6 +12,8 @@ BOOTINFO_REGEX = re.compile(
     r"^up:bootinfo:([^;\r\n]+);([0-9a-fA-F]{12});([0-9a-fA-F]{12});([^;\r\n]+);connect$"
 )
 ONOFF_EVENT_REGEX = re.compile(r"^up:(?:event:)?onoff:([1-4]):(on|off)$")
+POWER_REPORT_REGEX = re.compile(r"^up:power_report:([1-4]):(-?\d+)$")
+QUERY_REGEX = re.compile(r"^up:query:(-?\d+)$")
 
 
 class MTTLDevice:
@@ -33,6 +35,7 @@ class MTTLDevice:
         self.online = True
         self.voltage_v: float | None = None
         self.total_current_a: float | None = None
+        self.wifi_rssi: int | None = None
         self.outlets: dict[int, dict[str, Any]] = {
             i: {
                 "channel": i,
@@ -61,6 +64,10 @@ class MTTLDevice:
                 if "current_a" in data:
                     self.outlets[ch]["current_a"] = data["current_a"]
                     total_curr += data["current_a"]
+                elif not data.get("state"):
+                    self.outlets[ch]["current_a"] = 0.0
+                elif self.outlets[ch].get("current_a", 0.0) > 0:
+                    total_curr += self.outlets[ch]["current_a"]
                 elif data.get("state") and data["power_w"] > 0 and self.voltage_v:
                     calc_curr = round(data["power_w"] / self.voltage_v, 3)
                     self.outlets[ch]["current_a"] = calc_curr
@@ -69,7 +76,8 @@ class MTTLDevice:
                     self.outlets[ch]["current_a"] = 0.0
         if "voltage_v" in channel_data[0] if channel_data else False:
             self.voltage_v = channel_data[0].get("voltage_v")
-        self.total_current_a = round(total_curr, 3)
+        if total_curr > 0 or self.total_current_a is None:
+            self.total_current_a = round(total_curr, 3)
 
 
 class MTTLServer:
@@ -144,17 +152,40 @@ class MTTLServer:
             _LOGGER.error("Failed to send relay command to %s: %s", mac, err)
             return False
 
+    async def _poll_device(self, device: MTTLDevice) -> None:
+        """Poll telemetry from a connected device."""
+        if not device.online or device.writer.is_closing():
+            return
+        try:
+            # 1. Core telemetry (Watt, kWh, Temp, State per channel)
+            device.writer.write(b"up:getinfo:all\r\n")
+            await device.writer.drain()
+            await asyncio.sleep(0.05)
+
+            # 2. Native hardware RMS Voltage (mV)
+            device.writer.write(b"up:power_report:1:vol\r\n")
+            await device.writer.drain()
+            await asyncio.sleep(0.05)
+
+            # 3. Native hardware Current per channel (mA)
+            for ch in range(1, 5):
+                device.writer.write(f"up:power_report:{ch}:current\r\n".encode("ascii"))
+                await device.writer.drain()
+                await asyncio.sleep(0.05)
+
+            # 4. Wi-Fi signal strength
+            device.writer.write(b"up:query:wifirssi\r\n")
+            await device.writer.drain()
+        except Exception as err:
+            _LOGGER.debug("Error polling %s: %s", device.mac, err)
+
     async def _poll_loop(self) -> None:
         """Periodically poll all connected devices."""
         while True:
             await asyncio.sleep(self.poll_interval)
             for device in list(self.devices.values()):
                 if device.online and not device.writer.is_closing():
-                    try:
-                        device.writer.write(b"up:getinfo:all\r\n")
-                        await device.writer.drain()
-                    except Exception as err:
-                        _LOGGER.debug("Error polling %s: %s", device.mac, err)
+                    await self._poll_device(device)
 
     async def _handle_client(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
@@ -198,9 +229,8 @@ class MTTLServer:
                         self.devices[mac] = current_device
                         self._notify(current_device)
 
-                        # Request immediate status
-                        writer.write(b"up:getinfo:all\r\n")
-                        await writer.drain()
+                        # Request immediate telemetry
+                        asyncio.create_task(self._poll_device(current_device))
                         continue
 
                     if not current_device:
@@ -214,7 +244,35 @@ class MTTLServer:
                             self._notify(current_device)
                         continue
 
-                    # 3. Relay change event
+                    # 3. Native power_report frame (voltage mV or outlet current mA)
+                    power_report_match = POWER_REPORT_REGEX.match(line)
+                    if power_report_match:
+                        ch = int(power_report_match.group(1))
+                        raw_val = int(power_report_match.group(2))
+                        if raw_val >= 50000:
+                            # Voltage in millivolts -> Volts (e.g. 224500 -> 224.5V)
+                            current_device.voltage_v = round(raw_val / 1000.0, 1)
+                        else:
+                            # Current in milliamps -> Amperes (e.g. 1450 -> 1.45A)
+                            current_device.outlets[ch]["current_a"] = round(max(0, raw_val) / 1000.0, 3)
+                            current_device.total_current_a = round(
+                                sum(
+                                    current_device.outlets[i].get("current_a", 0.0)
+                                    for i in current_device.outlets
+                                ),
+                                3,
+                            )
+                        self._notify(current_device)
+                        continue
+
+                    # 4. Query frame (e.g. wifirssi)
+                    query_match = QUERY_REGEX.match(line)
+                    if query_match:
+                        current_device.wifi_rssi = int(query_match.group(1))
+                        self._notify(current_device)
+                        continue
+
+                    # 5. Relay change event
                     onoff_match = ONOFF_EVENT_REGEX.match(line)
                     if onoff_match:
                         outlet = int(onoff_match.group(1))
