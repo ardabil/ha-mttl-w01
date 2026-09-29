@@ -1,10 +1,10 @@
-# Multi Tap Jinheung (Home Assistant Integration)
+# Multi Tap Jinheung / Stop Kontak Pintar (4-Gang Smart Power Strip)
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=ardabil&repository=ha-mttl-w01&category=integration)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/default)
 [![Validate with hassfest](https://img.shields.io/badge/hassfest-passing-brightgreen.svg)](https://github.com/home-assistant/core)
 
-Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pintar 4 lubang **Multi Tap Jinheung** (LG MTTL-W01). Berjalan langsung menggunakan protokol TCP socket lokal (port `10086`) tanpa memerlukan perantara Matter bridge ataupun broker MQTT.
+Integrasi Native Home Assistant (HACS) berbasis Python murni untuk **Multi Tap Jinheung / Stop Kontak Pintar** (LG U+ MTTL-W01 4-Gang Smart Power Strip). Berjalan langsung menggunakan protokol TCP socket lokal (port `10086`) tanpa memerlukan perantara Matter bridge ataupun broker MQTT.
 
 ---
 
@@ -16,8 +16,8 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
 - **Sensor Daya Realtime:** Pembacaan konsumsi daya aktif (Watt) setiap outlet.
 - **Sensor Energi Akumulasi:** Pembacaan akumulasi energi berjalan per outlet (kWh), kompatibel penuh dengan *Home Assistant Energy Dashboard*.
 - **Sensor Suhu Internal:** Pemantauan suhu internal PCB (°C) untuk keamanan proteksi overheat.
-- **Sensor Sinyal Wi-Fi (RSSI):** Pemantauan kualitas sinyal nirkabel colokan (dBm) via `up:query:wifirssi`.
-- **Auto-Discovery:** Otomatis mendeteksi perangkat baru ketika colokan terhubung ke port TCP Home Assistant.
+- **Sensor Sinyal Wi-Fi (RSSI):** Pemantauan kualitas sinyal nirkabel smart power strip (dBm) via `up:query:wifirssi`.
+- **Auto-Discovery:** Otomatis mendeteksi perangkat baru ketika smart power strip terhubung ke port TCP Home Assistant.
 - **100% Native Firmware Bawaan:** Berfungsi penuh pada **firmware bawaan pabrik (1.0.66)**. **Tidak perlu memodifikasi atau mem-flash firmware sama sekali!**
 
 ---
@@ -42,14 +42,14 @@ Integrasi Native Home Assistant (HACS) berbasis Python murni untuk colokan pinta
 
 ---
 
-## 🔌 Setup Wi-Fi Colokan (Pairing ke Home Assistant)
+## 🔌 Setup Wi-Fi Smart Power Strip (Pairing ke Home Assistant)
 
-Colokan ini membutuhkan konfigurasi SSID Wi-Fi rumah dan IP Home Assistant Anda agar dapat mengalirkan data ke port `10086`.
+Smart power strip ini membutuhkan konfigurasi SSID Wi-Fi rumah dan IP Home Assistant Anda agar dapat mengalirkan data ke port `10086`.
 
 ### 1. Masuk ke Mode Pairing (SoftAP)
-1. Colok Jinheung MTTL-W01 ke sumber listrik.
+1. Hubungkan Jinheung MTTL-W01 ke sumber listrik.
 2. Tekan dan tahan tombol fisik utama selama **10 detik** sampai lampu LED Wi-Fi berkedip cepat.
-3. Sambungkan Wi-Fi laptop atau HP Anda ke access point colokan:
+3. Sambungkan Wi-Fi laptop atau smartphone Anda ke access point smart power strip:
    - **SSID:** `TONLY_TAP_XXXXXXX`
    - **Password:** `LGU_XXXXXXX`
 
@@ -62,11 +62,11 @@ Gunakan salah satu alat bantu di bawah ini:
   - Buka aplikasi, masukkan SSID Wi-Fi 2.4 GHz, Password Wi-Fi rumah, dan **IP Home Assistant** Anda.
   - Klik **Start Wi-Fi setup**.
 
-* **Pilihan B: Menggunakan HP Android (APK)**
+* **Pilihan B: Menggunakan Smartphone Android (APK)**
   - 📱 **[Download MTTL-W01 Provisioner APK](https://github.com/af950833/mttl_w01/raw/main/web/downloads/MTTL-W01-Provisioner.apk)**
   - Pasang di Android, pilih SSID Wi-Fi 2.4 GHz, masukkan password, lalu klik **Provision**.
 
-Setelah colokan reboot otomatis (LED berhenti berkedip), colokan akan langsung terhubung ke Home Assistant dan seluruh saklar serta sensor akan otomatis muncul!
+Setelah smart power strip reboot otomatis (LED berhenti berkedip), perangkat akan langsung terhubung ke Home Assistant dan seluruh saklar serta sensor akan otomatis muncul!
 
 ---
 
