@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Pengaturan Multi Tap Jinheung",
+        "description": "Konfigurasi port server TCP lokal dan interval polling untuk Multi Tap Jinheung.",
+        "data": {
+          "port": "Port Server TCP (Default: 10086)",
+          "poll_interval": "Interval Polling dalam detik (Default: 10)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Multi Tap Jinheung sudah terkonfigurasi."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opsi Multi Tap Jinheung",
+        "description": "Sesuaikan opsi server.",
+        "data": {
+          "port": "Port Server TCP",
+          "poll_interval": "Interval Polling (detik)"
+        }
+      }
+    }
+  }
+}
